@@ -1,0 +1,52 @@
+import tweepy
+from textblob import TextBlob
+
+# 使用你的 Twitter API Bearer Token
+bearer_token = 'YOUR_NEW_BEARER_TOKEN'
+
+# 设置 Twitter API v2 认证
+client = tweepy.Client(bearer_token=bearer_token)
+
+# 简单的 Bearer Token 测试
+def test_bearer_token():
+    try:
+        response = client.get_me()
+        print(response.data)
+    except tweepy.TweepyException as e:
+        print(f"An error occurred: {e}")
+
+# 定义一个函数来获取推文并分析其情感
+def analyze_sentiment(username, tweet_count=10):
+    try:
+        # 获取用户ID
+        user_response = client.get_user(username=username)
+        if user_response.errors:
+            print(f"Error fetching user: {user_response.errors}")
+            return
+        user_id = user_response.data.id
+
+        # 获取用户的最新推文
+        tweets_response = client.get_users_tweets(id=user_id, max_results=tweet_count)
+        if tweets_response.errors:
+            print(f"Error fetching tweets: {tweets_response.errors}")
+            return
+
+        for tweet in tweets_response.data:
+            # 打印推文文本
+            print(f"Tweet: {tweet.text}")
+            
+            # 使用 TextBlob 进行情感分析
+            analysis = TextBlob(tweet.text)
+            sentiment = analysis.sentiment
+            
+            # 打印情感分析结果
+            print(f"Sentiment: {sentiment}")
+            print("------")
+    except tweepy.TweepyException as e:
+        print(f"An error occurred: {e}")
+
+# 测试 Bearer Token
+test_bearer_token()
+
+# 使用示例
+analyze_sentiment('elonmusk', tweet_count=5)
